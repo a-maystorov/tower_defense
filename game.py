@@ -1,6 +1,8 @@
 import pygame
 import sys
 
+from settings import Settings
+
 
 class Game:
     """Overall class to manage game assets and behaviour."""
@@ -8,10 +10,10 @@ class Game:
     def __init__(self):
         """Initialize the game, and create game resources."""
         pygame.init()
-
         self.clock = pygame.time.Clock()
-
-        self.screen = pygame.display.set_mode((1280, 720))
+        self.settings = Settings()
+        self.screen = pygame.display.set_mode(
+            (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Tower Defense Game")
 
     def run_game(self):
@@ -23,7 +25,7 @@ class Game:
                     sys.exit()
 
             # Make the most recently drawn screen visible.
-            self.screen.fill((0, 155, 0))
+            self.screen.fill(self.settings.bg_color)
             pygame.display.flip()
 
             # limit FPS to 60
@@ -32,5 +34,5 @@ class Game:
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
-    td = Game()
-    td.run_game()
+    game = Game()
+    game.run_game()
