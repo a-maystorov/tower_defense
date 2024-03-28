@@ -9,6 +9,8 @@ class Game:
         """Initialize the game, and create game resources."""
         pygame.init()
 
+        self.clock = pygame.time.Clock()
+
         self.screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Tower Defense Game")
 
@@ -23,6 +25,9 @@ class Game:
             # Make the most recently drawn screen visible.
             self.screen.fill((0, 155, 0))
             pygame.display.flip()
+
+            # limit FPS to 60
+            self.clock.tick(60)
 
 
 if __name__ == '__main__':
