@@ -2,6 +2,7 @@ import pygame
 import sys
 
 from settings import Settings
+from archer import Archer
 
 
 class Game:
@@ -16,6 +17,10 @@ class Game:
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Tower Defense Game")
 
+        # Entities
+        self.archer = Archer(self, health=100, cost=50, position=(
+            100, 100), attack_power=15, attack_range=5)
+
     def run_game(self):
         """Start the main loop for the game."""
         while True:
@@ -24,8 +29,11 @@ class Game:
                 if event.type == pygame.QUIT:
                     sys.exit()
 
-            # Make the most recently drawn screen visible.
+            # Redraw the screen during each pass through the loop.
             self.screen.fill(self.settings.bg_color)
+            self.archer.blitme()
+
+            # Make the most recently drawn screen visible.
             pygame.display.flip()
 
             # limit FPS to 60
