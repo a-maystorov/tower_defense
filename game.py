@@ -3,6 +3,7 @@ import sys
 
 from settings import Settings
 from archer import Archer
+from grid import Grid
 
 
 class Game:
@@ -18,6 +19,7 @@ class Game:
         pygame.display.set_caption("Tower Defense Game")
 
         # Entities
+        self.grid = Grid(self, rows=5)
         self.archer = Archer(self, health=100, cost=50, position=(
             100, 100), attack_power=15, attack_range=5)
 
@@ -37,8 +39,8 @@ class Game:
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.settings.bg_color)
+        self.grid.draw()
         self.archer.blitme()
-
         pygame.display.flip()
 
 
