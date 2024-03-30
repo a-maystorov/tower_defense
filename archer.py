@@ -16,7 +16,13 @@ class Archer(Defender):
 
         # Load the archer image.
         self.image = pygame.image.load("images/archer.png").convert()
+        self.rect = self.image.get_rect()
+
+        self.held = False  # Indicates whether the archer is being dragged
 
     def blitme(self):
         """Draw the archer at its current position"""
-        self.screen.blit(self.image, self.position)
+        if self.held:
+            # Maybe add some visual feedback that the archer is being held
+            pass
+        self.screen.blit(self.image, self.rect)

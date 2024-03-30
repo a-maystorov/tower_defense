@@ -23,11 +23,43 @@ class Game:
         self.archer = Archer(self, health=100, cost=50, position=(
             100, 100), attack_power=15, attack_range=5)
 
+    def _check_mouse_button_down_events(self, event):
+        """Respond to mouse button presses."""
+        mouse_pos = event.pos
+        # Check if the mouse is over the archer and "pick it up"
+        if self.archer.rect.collidepoint(mouse_pos):
+            self.archer.held = True
+
+    def _check_mouse_button_up_events(self, event):
+        """Respond to mouse button releases."""
+        # Place the archer if it is being held
+        if self.archer.held:
+            self.archer.held = False
+            # Snap to the nearest grid cell center
+            grid_x = (event.pos[0] // self.grid.tile_size) * \
+                self.grid.tile_size + self.grid.tile_size // 2
+
+            grid_y = (event.pos[1] // self.grid.tile_size) * \
+                self.grid.tile_size + self.grid.tile_size // 2
+            self.archer.rect.center = (grid_x, grid_y)
+
+    def _check_mouse_motion_events(self, event):
+        """Respond to mouse movements."""
+        if self.archer.held:
+            # Move the archer with the mouse
+            self.archer.rect.center = event.pos
+
     def _check_events(self):
         """Respond to keypresses and mouse events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self._check_mouse_button_down_events(event)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self._check_mouse_button_up_events(event)
+            elif event.type == pygame.MOUSEMOTION:
+                self._check_mouse_motion_events(event)
 
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
