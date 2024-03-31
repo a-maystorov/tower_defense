@@ -26,3 +26,11 @@ class Grid:
             x = col * self.tile_size
             pygame.draw.line(self.screen, (255, 255, 255),
                              (x, 0), (x, self.screen_height))
+
+    def snap_to_center(self, mouse_pos):
+        """Calculates the center coordinates of the grid cell under the mouse."""
+        grid_x = (mouse_pos[0] // self.tile_size) * \
+            self.tile_size + self.tile_size // 2
+        grid_y = (mouse_pos[1] // self.tile_size) * \
+            self.tile_size + self.tile_size // 2
+        return grid_x, grid_y

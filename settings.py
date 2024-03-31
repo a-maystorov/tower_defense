@@ -7,3 +7,6 @@ class Settings:
         self.screen_width = 1280
         self.screen_height = 720
         self.bg_color = (0, 155, 0)
+
+        # Grid settings
+        self.grid_rows = 5
