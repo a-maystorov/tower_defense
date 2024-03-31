@@ -15,6 +15,7 @@ class Defender:
         self.screen = game.screen
         self.image = None
         self.rect = None
+        self.last_position = position
 
     def load_image(self, image_path):
         """Load defender image."""
@@ -28,10 +29,25 @@ class Defender:
             pass
         self.screen.blit(self.image, self.rect)
 
-    def handle_drag_and_drop(self, mouse_pos):
+    def drag(self, mouse_pos):
         """Set the defender as held when it is clicked."""
         if self.rect.collidepoint(mouse_pos):
             self.held = True
+            self.last_position = self.rect.center
+
+    def drop(self, mouse_pos):
+        """Drop the defender into a new position on the grid."""
+        if self.held:
+            self.held = False
+            new_position = self.game.grid.snap_to_center(mouse_pos)
+
+            if self.game.grid.can_place_defender(new_position):
+                self.game.grid.mark_cell(self.last_position, False)
+                self.rect.center = new_position
+                self.last_position = new_position
+                self.game.grid.mark_cell(new_position, True)
+            else:
+                self.rect.center = self.last_position
 
     def update_position(self, mouse_pos):
         """Update the defender's position to the mouse position."""

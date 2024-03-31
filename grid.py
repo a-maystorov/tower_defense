@@ -6,6 +6,7 @@ class Grid:
 
     def __init__(self, game, rows):
         """Initialize the grid with the game instance and number of rows."""
+        self.game = game
         self.screen = game.screen
         self.screen_width = game.settings.screen_width
         self.screen_height = game.settings.screen_height
@@ -34,3 +35,15 @@ class Grid:
         grid_y = (mouse_pos[1] // self.tile_size) * \
             self.tile_size + self.tile_size // 2
         return grid_x, grid_y
+
+    def can_place_defender(self, position):
+        """Check if a defender can be placed at the given position."""
+        grid_x, grid_y = self.snap_to_center(position)
+        grid_coord = (grid_x // self.tile_size, grid_y // self.tile_size)
+        return not self.game.occupied_cells.get(grid_coord, False)
+
+    def mark_cell(self, position, status):
+        """Mark or unmark the cell at the given position as occupied."""
+        grid_x, grid_y = self.snap_to_center(position)
+        grid_coord = (grid_x // self.tile_size, grid_y // self.tile_size)
+        self.game.occupied_cells[grid_coord] = status

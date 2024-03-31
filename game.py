@@ -19,26 +19,27 @@ class Game:
         pygame.display.set_caption("Tower Defense Game")
 
         self.grid = Grid(self, rows=self.settings.grid_rows)
+        self.occupied_cells = {}
 
         # Initialize a list of defenders
         self.defenders = [
             Archer(self, position=(100, 100)),
             Archer(self, position=(200, 200)),
         ]
+        for defender in self.defenders:
+            self.grid.mark_cell(defender.rect.center, True)
 
     def _check_mouse_button_down_events(self, event):
         """Respond to mouse button presses."""
         mouse_pos = event.pos
         for defender in self.defenders:
-            defender.handle_drag_and_drop(mouse_pos)
+            defender.drag(mouse_pos)
 
     def _check_mouse_button_up_events(self, event):
         """Respond to mouse button releases."""
         mouse_pos = event.pos
         for defender in self.defenders:
-            if defender.held:
-                defender.held = False
-                defender.rect.center = self.grid.snap_to_center(mouse_pos)
+            defender.drop(mouse_pos)
 
     def _check_mouse_motion_events(self, event):
         """Respond to mouse movements."""
