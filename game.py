@@ -4,6 +4,7 @@ import sys
 from settings import Settings
 from archer import Archer
 from grid import Grid
+from shop import Shop
 
 
 class Game:
@@ -20,37 +21,56 @@ class Game:
 
         self.grid = Grid(self)
         self.occupied_cells = {}
+        self.shop = Shop(self)  # Initialize the shop
+        self.resources = self.settings.starting_resources  # Initialize player resources
+        # This will hold the defender the player has selected to place
+        self.selected_defender = None
 
-        # Initialize the first two archers on the first and second tile
-        tile_center_offset = self.grid.tile_size // 2
-        first_tile_position = (
-            self.grid.start_x + tile_center_offset, self.grid.start_y + tile_center_offset)
-        second_tile_position = (self.grid.start_x + self.grid.tile_size +
-                                tile_center_offset, self.grid.start_y + tile_center_offset)
-
-        self.defenders = [
-            Archer(self, position=first_tile_position),
-            Archer(self, position=second_tile_position),
-        ]
-        for defender in self.defenders:
-            self.grid.mark_cell(defender.rect.center, True)
+        # Initialize defenders list.
+        self.defenders = []
 
     def _check_mouse_button_down_events(self, event):
         """Respond to mouse button presses."""
         mouse_pos = event.pos
-        for defender in self.defenders:
-            defender.drag(mouse_pos)
+        if self.selected_defender is None:
+            defender_type = self.shop.handle_click(event.pos)
+            if defender_type:
+                # Create the defender but do not deduct cost yet
+                self.selected_defender = defender_type(
+                    self, position=event.pos)
+                self.selected_defender.held = True  # Indicate that this defender is being held
 
     def _check_mouse_button_up_events(self, event):
         """Respond to mouse button releases."""
         mouse_pos = event.pos
-        for defender in self.defenders:
-            defender.drop(mouse_pos)
+        if self.selected_defender and self.selected_defender.held:
+            # Attempt to place the defender on the grid
+            can_place = self.grid.can_place_defender(mouse_pos)
+            if can_place and self.resources >= self.selected_defender.cost:
+                # Successful drop: defender is placed and resources deducted
+                self.selected_defender.drop(mouse_pos)
+                self.resources -= self.selected_defender.cost
+                self.defenders.append(self.selected_defender)
+                # Log the resource change
+                print(f"Resources after placement: {self.resources}")
+            elif not can_place:
+                # Failed drop: defender is not placed
+                if hasattr(self.selected_defender, 'original_position'):
+                    # Reset the defender's position to the original position if it exists
+                    self.selected_defender.rect.center = self.selected_defender.original_position
+            # After placement attempt, whether successful or not, the defender is no longer held
+            self.selected_defender.held = False
+            self.selected_defender = None
 
     def _check_mouse_motion_events(self, event):
         """Respond to mouse movements."""
-        for defender in self.defenders:
-            defender.update_position(event.pos)
+        if self.selected_defender and self.selected_defender.held:
+            # Update the position of the defender that's currently being dragged
+            self.selected_defender.update_position(event.pos)
+        else:
+            # If no defender is currently selected, check if we start dragging an already placed defender
+            for defender in self.defenders:
+                defender.update_position(event.pos)
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""
@@ -68,9 +88,14 @@ class Game:
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.settings.bg_color)
         self.grid.draw()
+        self.shop.draw()
 
         for defender in self.defenders:
             defender.blitme()
+
+        if self.selected_defender is not None:
+            # If a defender is selected, draw it on top of everything
+            self.selected_defender.blitme()
 
         pygame.display.flip()
 
