@@ -10,3 +10,5 @@ class Settings:
 
         # Grid settings
         self.grid_rows = 5
+        self.grid_columns = 8
+        self.grid_tile_size = 120

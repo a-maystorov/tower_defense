@@ -18,13 +18,19 @@ class Game:
             (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Tower Defense Game")
 
-        self.grid = Grid(self, rows=self.settings.grid_rows)
+        self.grid = Grid(self)
         self.occupied_cells = {}
 
-        # Initialize a list of defenders
+        # Initialize the first two archers on the first and second tile
+        tile_center_offset = self.grid.tile_size // 2
+        first_tile_position = (
+            self.grid.start_x + tile_center_offset, self.grid.start_y + tile_center_offset)
+        second_tile_position = (self.grid.start_x + self.grid.tile_size +
+                                tile_center_offset, self.grid.start_y + tile_center_offset)
+
         self.defenders = [
-            Archer(self, position=(100, 100)),
-            Archer(self, position=(200, 200)),
+            Archer(self, position=first_tile_position),
+            Archer(self, position=second_tile_position),
         ]
         for defender in self.defenders:
             self.grid.mark_cell(defender.rect.center, True)
