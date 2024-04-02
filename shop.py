@@ -1,6 +1,5 @@
-# Create a new file called shop.py
-
 import pygame
+
 from archer import Archer
 
 
