@@ -2,7 +2,6 @@ import pygame
 import sys
 
 from settings import Settings
-from archer import Archer
 from grid import Grid
 from shop import Shop
 
@@ -21,47 +20,61 @@ class Game:
 
         self.grid = Grid(self)
         self.occupied_cells = {}
-        self.shop = Shop(self)  # Initialize the shop
-        self.resources = self.settings.starting_resources  # Initialize player resources
-        # This will hold the defender the player has selected to place
+
+        self.shop = Shop(self)
+        self.resources = self.settings.starting_resources
+
+        self.defenders = []
         self.selected_defender = None
 
-        # Initialize defenders list.
-        self.defenders = []
+    def _instantiate_selected_defender(self, defender_class, position):
+        """Instantiates the selected defender at the given position."""
+        self.selected_defender = defender_class(self, position=position)
+        self.selected_defender.held = True
+
+    def _try_select_defender(self, mouse_pos):
+        """Attempts to select a defender based on the mouse position."""
+        defender_class = self.shop.get_selected_defender(mouse_pos)
+        if defender_class:
+            self._instantiate_selected_defender(defender_class, mouse_pos)
 
     def _check_mouse_button_down_events(self, event):
         """Respond to mouse button presses."""
-        mouse_pos = event.pos
         if self.selected_defender is None:
-            defender_type = self.shop.handle_click(event.pos)
-            if defender_type:
-                # Create the defender but do not deduct cost yet
-                self.selected_defender = defender_type(
-                    self, position=event.pos)
-                self.selected_defender.held = True  # Indicate that this defender is being held
+            self._try_select_defender(event.pos)
+
+    def _is_defender_selected_and_held(self):
+        """Check if a defender is currently selected and held."""
+        return self.selected_defender and self.selected_defender.held
+
+    def _can_place_defender(self, position):
+        """Check if the selected defender can be placed at the specified position."""
+        return self.grid.can_place_defender(position) and self.resources >= self.selected_defender.cost
+
+    def _place_defender(self, position):
+        """Place the selected defender on the grid and deduct its cost."""
+        self.selected_defender.drop(position)
+        self.resources -= self.selected_defender.cost
+        self.defenders.append(self.selected_defender)
+        print(f"Resources after placement: {self.resources}")
+        self._reset_selected_defender()
+
+    def _reset_selected_defender(self):
+        """Reset the state of the selected defender."""
+        self.selected_defender.held = False
+        self.selected_defender = None
 
     def _check_mouse_button_up_events(self, event):
         """Respond to mouse button releases."""
-        mouse_pos = event.pos
-        if self.selected_defender and self.selected_defender.held:
-            # Attempt to place the defender on the grid
-            can_place = self.grid.can_place_defender(mouse_pos)
-            if can_place and self.resources >= self.selected_defender.cost:
-                # Successful drop: defender is placed and resources deducted
-                self.selected_defender.drop(mouse_pos)
-                self.resources -= self.selected_defender.cost
-                self.defenders.append(self.selected_defender)
-                # Log the resource change
-                print(f"Resources after placement: {self.resources}")
-            elif not can_place:
-                # Failed drop: defender is not placed
-                if hasattr(self.selected_defender, 'original_position'):
-                    # Reset the defender's position to the original position if it exists
-                    self.selected_defender.rect.center = self.selected_defender.original_position
-            # After placement attempt, whether successful or not, the defender is no longer held
-            self.selected_defender.held = False
-            self.selected_defender = None
+        if not self._is_defender_selected_and_held():
+            return
 
+        if self._can_place_defender(event.pos):
+            self._place_defender(event.pos)
+        else:
+            self._reset_selected_defender()
+
+    # TODO: Check motion events and move already placed defenders
     def _check_mouse_motion_events(self, event):
         """Respond to mouse movements."""
         if self.selected_defender and self.selected_defender.held:
