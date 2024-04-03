@@ -51,6 +51,11 @@ class Game:
         """Check if the selected defender can be placed at the specified position."""
         return self.grid.can_place_defender(position) and self.resources >= self.selected_defender.cost
 
+    def _reset_selected_defender(self):
+        """Reset the state of the selected defender."""
+        self.selected_defender.held = False
+        self.selected_defender = None
+
     def _place_defender(self, position):
         """Place the selected defender on the grid and deduct its cost."""
         self.selected_defender.drop(position)
@@ -58,11 +63,6 @@ class Game:
         self.defenders.append(self.selected_defender)
         print(f"Resources after placement: {self.resources}")
         self._reset_selected_defender()
-
-    def _reset_selected_defender(self):
-        """Reset the state of the selected defender."""
-        self.selected_defender.held = False
-        self.selected_defender = None
 
     def _check_mouse_button_up_events(self, event):
         """Respond to mouse button releases."""
@@ -74,16 +74,10 @@ class Game:
         else:
             self._reset_selected_defender()
 
-    # TODO: Check motion events and move already placed defenders
     def _check_mouse_motion_events(self, event):
         """Respond to mouse movements."""
-        if self.selected_defender and self.selected_defender.held:
-            # Update the position of the defender that's currently being dragged
+        if self.selected_defender:
             self.selected_defender.update_position(event.pos)
-        else:
-            # If no defender is currently selected, check if we start dragging an already placed defender
-            for defender in self.defenders:
-                defender.update_position(event.pos)
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""
