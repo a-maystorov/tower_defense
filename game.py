@@ -27,29 +27,15 @@ class Game:
         self.defenders = []
         self.selected_defender = None
 
-    def _instantiate_selected_defender(self, defender_class, position):
-        """Instantiates the selected defender at the given position."""
-        self.selected_defender = defender_class(self, position=position)
-        self.selected_defender.held = True
-
     def _try_select_defender(self, mouse_pos):
         """Attempts to select a defender based on the mouse position."""
+        if self.selected_defender:
+            return
+
         defender_class = self.shop.get_selected_defender(mouse_pos)
         if defender_class:
-            self._instantiate_selected_defender(defender_class, mouse_pos)
-
-    def _check_mouse_button_down_events(self, event):
-        """Respond to mouse button presses."""
-        if self.selected_defender is None:
-            self._try_select_defender(event.pos)
-
-    def _is_defender_selected_and_held(self):
-        """Check if a defender is currently selected and held."""
-        return self.selected_defender and self.selected_defender.held
-
-    def _can_place_defender(self, position):
-        """Check if the selected defender can be placed at the specified position."""
-        return self.grid.can_place_defender(position) and self.resources >= self.selected_defender.cost
+            self.selected_defender = defender_class(self, position=mouse_pos)
+            self.selected_defender.held = True
 
     def _reset_selected_defender(self):
         """Reset the state of the selected defender."""
@@ -64,20 +50,32 @@ class Game:
         print(f"Resources after placement: {self.resources}")
         self._reset_selected_defender()
 
-    def _check_mouse_button_up_events(self, event):
-        """Respond to mouse button releases."""
-        if not self._is_defender_selected_and_held():
+    def _try_place_defender(self, position):
+        if not (self.selected_defender and self.selected_defender.held):
             return
 
-        if self._can_place_defender(event.pos):
-            self._place_defender(event.pos)
+        if self.grid.can_place_defender(position) and self.resources >= self.selected_defender.cost:
+            self._place_defender(position)
         else:
             self._reset_selected_defender()
 
+    def _try_update_position(self, position):
+        if not self.selected_defender:
+            return
+
+        self.selected_defender.update_position(position)
+
+    def _check_mouse_button_down_events(self, event):
+        """Respond to mouse button presses."""
+        self._try_select_defender(event.pos)
+
+    def _check_mouse_button_up_events(self, event):
+        """Respond to mouse button releases."""
+        self._try_place_defender(event.pos)
+
     def _check_mouse_motion_events(self, event):
         """Respond to mouse movements."""
-        if self.selected_defender:
-            self.selected_defender.update_position(event.pos)
+        self._try_update_position(event.pos)
 
     def _check_events(self):
         """Respond to keypresses and mouse events."""

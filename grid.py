@@ -55,7 +55,7 @@ class Grid:
         return not self.game.occupied_cells.get(grid_coord, False)
 
     def mark_cell(self, position, status):
-        """Mark or unmark the cell at the given position as occupied."""
+        """Mark the cell at the given position as occupied."""
         grid_x, grid_y = self.snap_to_center(position)
         grid_coord = (grid_x // self.tile_size, grid_y // self.tile_size)
         self.game.occupied_cells[grid_coord] = status
