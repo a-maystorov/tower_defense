@@ -6,7 +6,7 @@ class Arrow(Sprite):
     """A class to manage arrows fired by archers."""
 
     def __init__(self, game, start_pos):
-        """Create a bullet object at the archer's current position."""
+        """Create an arrow object at the archer's current position."""
         super().__init__()
         self.screen = game.screen
         self.settings = game.settings
