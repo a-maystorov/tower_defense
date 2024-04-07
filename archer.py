@@ -1,4 +1,7 @@
+import pygame
+
 from defender import Defender
+from arrow import Arrow
 
 
 class Archer(Defender):
@@ -15,4 +18,13 @@ class Archer(Defender):
         super().__init__(game, health, cost, position)
         self.attack_power = attack_power
         self.attack_range = attack_range
+        self.last_fired = pygame.time.get_ticks()
         self.load_image("images/archer.png")
+
+    def fire_arrow(self):
+        """Check if it's time to fire an arrow, and if so, create and launch it."""
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_fired > self.game.settings.arrow_fire_interval:
+            self.last_fired = current_time
+            new_arrow = Arrow(self.game, self.rect.midright)
+            self.game.arrows.add(new_arrow)

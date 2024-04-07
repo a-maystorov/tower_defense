@@ -4,6 +4,7 @@ import sys
 from settings import Settings
 from grid import Grid
 from shop import Shop
+from archer import Archer
 
 
 class Game:
@@ -26,6 +27,8 @@ class Game:
 
         self.defenders = []
         self.selected_defender = None
+
+        self.arrows = pygame.sprite.Group()
 
     def _try_select_defender(self, mouse_pos):
         """Attempts to select a defender based on the mouse position."""
@@ -89,14 +92,24 @@ class Game:
             elif event.type == pygame.MOUSEMOTION:
                 self._check_mouse_motion_events(event)
 
+    def _update_arrows(self):
+        """Update position of the arrows."""
+        self.arrows.update()
+
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.settings.bg_color)
         self.grid.draw()
         self.shop.draw()
 
+        for arrow in self.arrows.sprites():
+            arrow.draw_arrow()
+
         for defender in self.defenders:
             defender.blitme()
+
+            if isinstance(defender, Archer):
+                defender.fire_arrow()
 
         if self.selected_defender is not None:
             # If a defender is selected, draw it on top of everything
@@ -108,6 +121,8 @@ class Game:
         """Start the main loop for the game."""
         while True:
             self._check_events()
+            self._update_arrows()
+            print(self.arrows)
             self._update_screen()
             self.clock.tick(60)
 

@@ -14,3 +14,10 @@ class Settings:
         self.grid_rows = 5
         self.grid_columns = 8
         self.grid_tile_size = 120
+
+        # Arrow settings
+        self.arrow_speed = 2.0
+        self.arrow_width = 50
+        self.arrow_height = 3
+        self.arrow_color = (60, 60, 60)
+        self.arrow_fire_interval = 3000
