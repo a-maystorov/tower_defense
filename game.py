@@ -122,7 +122,6 @@ class Game:
         while True:
             self._check_events()
             self._update_arrows()
-            print(self.arrows)
             self._update_screen()
             self.clock.tick(60)
 
